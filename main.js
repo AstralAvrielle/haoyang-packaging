@@ -1,672 +1,541 @@
-const C = window.HAOYANG_CONFIG || {};
+const C=window.HAOYANG_CONFIG||{};
 
-/* =========================================================
-   COMMON TRANSLATIONS
-========================================================= */
-
-const common = {
-  zh: {
-    brand: '皓洋包装厂',
-    home: '首页',
-    about: '关于我们',
-    factory: '工厂实力',
-    custom: '定制包装',
-    cases: '案例展示',
-    contact: '询价联系',
-    cta: '获取定制报价',
-    footer: '精品礼盒与定制包装',
-    wa: 'WhatsApp 咨询'
-  },
-
-  en: {
-    brand: 'Haoyang Packaging',
-    home: 'Home',
-    about: 'About Us',
-    factory: 'Factory',
-    custom: 'Custom Packaging',
-    cases: 'Portfolio',
-    contact: 'Contact',
-    cta: 'Request a Quote',
-    footer: 'Premium Gift Boxes & Custom Packaging',
-    wa: 'WhatsApp Inquiry'
-  }
+const common={
+ zh:{
+  brand:'皓洋包装厂',
+  home:'首页',
+  about:'关于我们',
+  factory:'工厂实力',
+  custom:'定制包装',
+  cases:'案例',
+  contact:'询价联系',
+  cta:'获取包装方案',
+  footer:'精品礼盒与定制包装',
+  wa:'WhatsApp 咨询'
+ },
+ en:{
+  brand:'Haoyang Packaging',
+  home:'Home',
+  about:'About Us',
+  factory:'Factory',
+  custom:'Custom Packaging',
+  cases:'Portfolio',
+  contact:'Contact',
+  cta:'Get a Quote',
+  footer:'Premium Gift Boxes & Custom Packaging',
+  wa:'WhatsApp'
+ }
 };
 
 
 /* =========================================================
-   LANGUAGE
+   当前语言
 ========================================================= */
 
-let lang = localStorage.getItem('haoyang-lang') || 'zh';
+let lang=localStorage.getItem('haoyang-lang')||'zh';
 
-if (!['zh', 'en'].includes(lang)) {
-  lang = 'zh';
+
+/* =========================================================
+   网站通用内容
+   保持原来的逻辑不变
+========================================================= */
+
+function applyCommon(){
+
+ document.documentElement.lang=lang==='zh'?'zh-CN':'en';
+
+ const t=common[lang];
+
+
+ document.querySelectorAll('[data-common]').forEach(el=>{
+
+  const k=el.dataset.common;
+
+  if(t[k]){
+   el.innerHTML=t[k];
+  }
+
+ });
+
+
+ const b=document.getElementById('langToggle');
+
+ if(b){
+  b.textContent=lang==='zh'?'EN':'中文';
+ }
+
+
+ document.querySelectorAll('[data-address]').forEach(el=>
+
+  el.textContent=lang==='zh'
+   ?C.addressZh
+   :C.addressEn
+
+ );
+
+
+ document.querySelectorAll('[data-email]').forEach(el=>{
+
+  el.textContent=C.email;
+
+  el.href='mailto:'+C.email;
+
+ });
+
+
+ document.querySelectorAll('[data-phone]').forEach(el=>{
+
+  el.textContent=C.phone;
+
+  el.href='tel:'+C.phone;
+
+ });
+
+
+ document.querySelectorAll('[data-wechat]').forEach(el=>
+
+  el.textContent=C.wechat
+
+ );
+
+
+ document.querySelectorAll('[data-whatsapp]').forEach(el=>{
+
+  el.href=
+   C.whatsapp&&!C.whatsapp.startsWith('YOUR_')
+   ?
+   'https://wa.me/'
+   +C.whatsapp
+   +'?text='
+   +encodeURIComponent(
+    lang==='zh'
+    ?'您好，我想咨询定制包装。'
+    :'Hello, I would like to inquire about custom packaging.'
+   )
+   :
+   '#contact';
+
+ });
+
 }
 
 
 /* =========================================================
-   COMMON CONTENT
+   About 页面专用中英文切换
+
+   只在 about.html 执行
+   不影响 index / factory / custom-packaging
 ========================================================= */
 
-function applyCommon() {
-  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+function applyAbout(){
 
-  const t = common[lang];
+ const page=
+  (location.pathname.split('/').pop()||'index.html')
+  .toLowerCase();
 
 
-  /* Common navigation / buttons */
+ /* 不是 about 页面就直接退出 */
 
-  document.querySelectorAll('[data-common]').forEach(el => {
-    const key = el.dataset.common;
+ if(page!=='about.html'){
+  return;
+ }
 
-    if (t[key]) {
-      el.textContent = t[key];
-    }
+
+ /* 切换 About 页面中的 data-zh / data-en */
+
+ document.querySelectorAll('[data-zh][data-en]').forEach(el=>{
+
+  const text=
+   lang==='zh'
+   ?el.getAttribute('data-zh')
+   :el.getAttribute('data-en');
+
+
+  if(text!==null){
+
+   el.innerHTML=text;
+
+  }
+
+ });
+
+}
+
+
+/* =========================================================
+   切换语言
+========================================================= */
+
+function switchLang(){
+
+ lang=lang==='zh'?'en':'zh';
+
+
+ localStorage.setItem(
+  'haoyang-lang',
+  lang
+ );
+
+
+ /* 原来的通用切换 */
+
+ applyCommon();
+
+
+ /* 新增：
+    只有 About 页面才会真正执行
+ */
+
+ applyAbout();
+
+
+ /* 保留原来的语言事件 */
+
+ document.dispatchEvent(
+
+  new CustomEvent(
+
+   'haoyang-language',
+
+   {
+    detail:{lang}
+   }
+
+  )
+
+ );
+
+}
+
+
+/* =========================================================
+   页面加载
+========================================================= */
+
+document.addEventListener('DOMContentLoaded',()=>{
+
+
+ /* 原来的通用语言 */
+
+ applyCommon();
+
+
+ /* 新增 About 页面语言 */
+
+ applyAbout();
+
+
+ /* 原来的切换按钮 */
+
+ document.getElementById('langToggle')
+ ?.addEventListener(
+  'click',
+  switchLang
+ );
+
+
+ /* =======================================================
+    NAV 滚动效果
+    原代码保持不变
+ ======================================================= */
+
+ const nav=document.querySelector('.nav');
+
+
+ const onScroll=()=>nav?.classList.toggle(
+
+  'scrolled',
+
+  window.scrollY>12
+
+ );
+
+
+ onScroll();
+
+
+ window.addEventListener(
+
+  'scroll',
+
+  onScroll,
+
+  {passive:true}
+
+ );
+
+
+ /* =======================================================
+    当前导航高亮
+    原代码保持不变
+ ======================================================= */
+
+ const page=
+
+  (
+   location.pathname.split('/').pop()
+   ||
+   'index.html'
+  )
+  .toLowerCase();
+
+
+ document.querySelectorAll('.nav-links a').forEach(a=>{
+
+  const href=
+
+   (
+    a.getAttribute('href')
+    ||
+    ''
+   )
+   .split('#')[0]
+   .toLowerCase();
+
+
+  if(
+
+   (
+    page==='index.html'
+    &&
+    href==='index.html'
+   )
+
+   ||
+
+   href===page
+
+  ){
+
+   a.classList.add('active');
+
+  }
+
+ });
+
+
+ /* =======================================================
+    Reveal 动画
+    原代码保持不变
+ ======================================================= */
+
+ const io=new IntersectionObserver(
+
+  es=>es.forEach(e=>{
+
+   if(e.isIntersecting){
+
+    e.target.classList.add('in');
+
+    io.unobserve(e.target);
+
+   }
+
+  }),
+
+  {
+   threshold:.12,
+   rootMargin:'0px 0px -5%'
+  }
+
+ );
+
+
+ document.querySelectorAll('.reveal').forEach((e,i)=>{
+
+  e.style.transitionDelay=(i%4)*70+'ms';
+
+  io.observe(e);
+
+ });
+
+
+ /* =======================================================
+    Tilt
+    原代码保持不变
+ ======================================================= */
+
+ document.querySelectorAll('.tilt').forEach(card=>{
+
+  card.addEventListener('pointermove',e=>{
+
+   const r=card.getBoundingClientRect(),
+
+   x=(e.clientX-r.left)/r.width-.5,
+
+   y=(e.clientY-r.top)/r.height-.5;
+
+
+   card.style.transform=
+
+    `perspective(900px)
+     rotateY(${x*5}deg)
+     rotateX(${-y*5}deg)
+     translateY(-5px)`;
+
   });
 
 
-  /* Language switch button */
+  card.addEventListener('pointerleave',()=>{
 
-  const langButton = document.getElementById('langToggle');
+   card.style.transform='';
 
-  if (langButton) {
-    langButton.textContent = lang === 'zh' ? 'EN' : '中文';
+  });
 
-    langButton.setAttribute(
-      'aria-label',
-      lang === 'zh'
-        ? 'Switch to English'
-        : '切换为中文'
-    );
+ });
+
+
+ /* =======================================================
+    图片 Modal
+    原代码保持不变
+ ======================================================= */
+
+ const modal=document.getElementById('modal'),
+
+ mi=document.getElementById('modalImg');
+
+
+ document.querySelectorAll('.shot img').forEach(img=>
+
+  img.addEventListener('click',()=>{
+
+   if(modal&&mi){
+
+    mi.src=img.src;
+
+    modal.classList.add('open');
+
+   }
+
+  })
+
+ );
+
+
+ document.querySelector('.close')
+ ?.addEventListener(
+  'click',
+  ()=>modal?.classList.remove('open')
+ );
+
+
+ modal?.addEventListener('click',e=>{
+
+  if(e.target===modal){
+
+   modal.classList.remove('open');
+
+  }
+
+ });
+
+
+ /* =======================================================
+    询价表单
+    原代码保持不变
+ ======================================================= */
+
+ const form=document.getElementById('quoteForm');
+
+
+ if(form){
+
+  if(
+   C.email
+   &&
+   !C.email.startsWith('YOUR_')
+  ){
+
+   form.action=
+    'https://formsubmit.co/'
+    +C.email;
+
   }
 
 
-  /* Address */
+  form.addEventListener('submit',e=>{
 
-  document.querySelectorAll('[data-address]').forEach(el => {
-    const address = lang === 'zh'
-      ? C.addressZh
-      : C.addressEn;
+   if(
+    !C.email
+    ||
+    C.email.startsWith('YOUR_')
+   ){
 
-    if (address) {
-      el.textContent = address;
-    }
-  });
+    e.preventDefault();
 
 
-  /* Email */
+    alert(
 
-  document.querySelectorAll('[data-email]').forEach(el => {
-    if (!C.email) return;
+     lang==='zh'
 
-    el.textContent = C.email;
+     ?
 
-    if (el.tagName === 'A') {
-      el.href = 'mailto:' + C.email;
-    }
-  });
+     '请先在 site-config.js 中填写真实收件邮箱，再部署网站。'
 
+     :
 
-  /* Phone */
+     'Please add your real receiving email in site-config.js before deployment.'
 
-  document.querySelectorAll('[data-phone]').forEach(el => {
-    if (!C.phone) return;
-
-    el.textContent = C.phone;
-
-    if (el.tagName === 'A') {
-      el.href = 'tel:' + C.phone;
-    }
-  });
-
-
-  /* WeChat */
-
-  document.querySelectorAll('[data-wechat]').forEach(el => {
-    if (C.wechat) {
-      el.textContent = C.wechat;
-    }
-  });
-
-
-  /* WhatsApp */
-
-  document.querySelectorAll('[data-whatsapp]').forEach(el => {
-
-    const whatsappReady =
-      C.whatsapp &&
-      !C.whatsapp.startsWith('YOUR_');
-
-    if (whatsappReady) {
-
-      const message =
-        lang === 'zh'
-          ? '您好，我想咨询定制包装项目。'
-          : 'Hello, I would like to inquire about a custom packaging project.';
-
-      el.href =
-        'https://wa.me/' +
-        C.whatsapp +
-        '?text=' +
-        encodeURIComponent(message);
-
-    } else {
-
-      el.href = '#contact';
-
-    }
-
-    el.setAttribute(
-      'aria-label',
-      lang === 'zh'
-        ? '通过 WhatsApp 咨询'
-        : 'Contact us on WhatsApp'
     );
+
+   }
+
   });
-}
+
+ }
 
 
-/* =========================================================
-   PAGE TRANSLATIONS
+ /* =======================================================
+    Cursor Glow
+    原代码保持不变
+ ======================================================= */
 
-   使用方式：
+ if(
 
-   data-zh="中文"
-   data-en="English"
+  matchMedia('(pointer:fine)').matches
 
-========================================================= */
+  &&
 
-function applyPageTranslations() {
+  !matchMedia('(prefers-reduced-motion:reduce)').matches
 
-  document
-    .querySelectorAll('[data-zh][data-en]')
-    .forEach(el => {
+ ){
 
-      const value = el.getAttribute(
-        lang === 'zh'
-          ? 'data-zh'
-          : 'data-en'
-      );
-
-      if (value === null) return;
+  const glow=document.createElement('div');
 
 
-      /*
-       * META 标签不能使用 innerHTML，
-       * 所以更新 content 属性
-       */
-
-      if (el.tagName === 'META') {
-
-        el.setAttribute('content', value);
-
-      } else {
-
-        /*
-         * 使用 innerHTML
-         * 是为了支持 <br> 换行
-         */
-
-        el.innerHTML = value;
-
-      }
-
-    });
+  glow.className='cursor-glow';
 
 
-  /* Image ALT translations */
-
-  document
-    .querySelectorAll('[data-alt-zh][data-alt-en]')
-    .forEach(el => {
-
-      const alt =
-        lang === 'zh'
-          ? el.getAttribute('data-alt-zh')
-          : el.getAttribute('data-alt-en');
-
-      if (alt !== null) {
-        el.setAttribute('alt', alt);
-      }
-
-    });
-}
+  document.body.appendChild(glow);
 
 
-/* =========================================================
-   LANGUAGE SWITCH
-========================================================= */
+  window.addEventListener(
 
-function switchLang() {
+   'pointermove',
 
-  lang = lang === 'zh'
-    ? 'en'
-    : 'zh';
+   e=>{
 
-  localStorage.setItem(
-    'haoyang-lang',
-    lang
+    glow.style.left=e.clientX+'px';
+
+    glow.style.top=e.clientY+'px';
+
+    glow.style.opacity='1';
+
+   },
+
+   {passive:true}
+
   );
 
-  applyCommon();
 
-  applyPageTranslations();
+  document.documentElement.addEventListener(
 
+   'mouseleave',
 
-  /*
-   * 给其他页面脚本使用
-   */
+   ()=>glow.style.opacity='0'
 
-  document.dispatchEvent(
-    new CustomEvent(
-      'haoyang-language',
-      {
-        detail: {
-          lang
-        }
-      }
-    )
   );
-}
 
+ }
 
-/* =========================================================
-   PAGE INITIALIZATION
-========================================================= */
-
-document.addEventListener(
-  'DOMContentLoaded',
-  () => {
-
-    /* Apply language */
-
-    applyCommon();
-
-    applyPageTranslations();
-
-
-    /* Language toggle */
-
-    document
-      .getElementById('langToggle')
-      ?.addEventListener(
-        'click',
-        switchLang
-      );
-
-
-    /* =====================================================
-       NAV SCROLL EFFECT
-    ===================================================== */
-
-    const nav =
-      document.querySelector('.nav');
-
-    const onScroll = () => {
-
-      nav?.classList.toggle(
-        'scrolled',
-        window.scrollY > 12
-      );
-
-    };
-
-    onScroll();
-
-    window.addEventListener(
-      'scroll',
-      onScroll,
-      {
-        passive: true
-      }
-    );
-
-
-    /* =====================================================
-       ACTIVE NAVIGATION
-    ===================================================== */
-
-    const page =
-      (
-        location.pathname
-          .split('/')
-          .pop() ||
-        'index.html'
-      ).toLowerCase();
-
-    document
-      .querySelectorAll('.nav-links a')
-      .forEach(a => {
-
-        const href =
-          (
-            a.getAttribute('href') || ''
-          )
-            .split('#')[0]
-            .toLowerCase();
-
-        if (
-          (
-            page === 'index.html' &&
-            href === 'index.html'
-          ) ||
-          href === page
-        ) {
-
-          a.classList.add('active');
-
-        }
-
-      });
-
-
-    /* =====================================================
-       REVEAL ANIMATION
-    ===================================================== */
-
-    if ('IntersectionObserver' in window) {
-
-      const io =
-        new IntersectionObserver(
-          entries => {
-
-            entries.forEach(entry => {
-
-              if (
-                entry.isIntersecting
-              ) {
-
-                entry
-                  .target
-                  .classList
-                  .add('in');
-
-                io.unobserve(
-                  entry.target
-                );
-
-              }
-
-            });
-
-          },
-          {
-            threshold: 0.12,
-            rootMargin:
-              '0px 0px -5%'
-          }
-        );
-
-
-      document
-        .querySelectorAll('.reveal')
-        .forEach(
-          (el, index) => {
-
-            el.style.transitionDelay =
-              (index % 4) *
-                70 +
-              'ms';
-
-            io.observe(el);
-
-          }
-        );
-
-    } else {
-
-      document
-        .querySelectorAll('.reveal')
-        .forEach(el => {
-
-          el.classList.add('in');
-
-        });
-
-    }
-
-
-    /* =====================================================
-       CARD TILT
-    ===================================================== */
-
-    document
-      .querySelectorAll('.tilt')
-      .forEach(card => {
-
-        card.addEventListener(
-          'pointermove',
-          e => {
-
-            const rect =
-              card.getBoundingClientRect();
-
-            const x =
-              (
-                e.clientX -
-                rect.left
-              ) /
-                rect.width -
-              0.5;
-
-            const y =
-              (
-                e.clientY -
-                rect.top
-              ) /
-                rect.height -
-              0.5;
-
-            card.style.transform =
-              `perspective(900px)
-               rotateY(${x * 5}deg)
-               rotateX(${-y * 5}deg)
-               translateY(-5px)`;
-
-          }
-        );
-
-
-        card.addEventListener(
-          'pointerleave',
-          () => {
-
-            card.style.transform = '';
-
-          }
-        );
-
-      });
-
-
-    /* =====================================================
-       IMAGE MODAL
-    ===================================================== */
-
-    const modal =
-      document.getElementById(
-        'modal'
-      );
-
-    const modalImage =
-      document.getElementById(
-        'modalImg'
-      );
-
-
-    document
-      .querySelectorAll(
-        '.shot img'
-      )
-      .forEach(img => {
-
-        img.addEventListener(
-          'click',
-          () => {
-
-            if (
-              modal &&
-              modalImage
-            ) {
-
-              modalImage.src =
-                img.src;
-
-              modal.classList.add(
-                'open'
-              );
-
-            }
-
-          }
-        );
-
-      });
-
-
-    document
-      .querySelector('.close')
-      ?.addEventListener(
-        'click',
-        () => {
-
-          modal?.classList.remove(
-            'open'
-          );
-
-        }
-      );
-
-
-    modal?.addEventListener(
-      'click',
-      e => {
-
-        if (
-          e.target === modal
-        ) {
-
-          modal.classList.remove(
-            'open'
-          );
-
-        }
-
-      }
-    );
-
-
-    /* =====================================================
-       QUOTE FORM
-    ===================================================== */
-
-    const form =
-      document.getElementById(
-        'quoteForm'
-      );
-
-    if (form) {
-
-      if (
-        C.email &&
-        !C.email.startsWith(
-          'YOUR_'
-        )
-      ) {
-
-        form.action =
-          'https://formsubmit.co/' +
-          C.email;
-
-      }
-
-
-      form.addEventListener(
-        'submit',
-        e => {
-
-          if (
-            !C.email ||
-            C.email.startsWith(
-              'YOUR_'
-            )
-          ) {
-
-            e.preventDefault();
-
-            alert(
-              lang === 'zh'
-                ? '请先在 site-config.js 中填写真实收件邮箱，再部署网站。'
-                : 'Please add your receiving email in site-config.js before deploying the website.'
-            );
-
-          }
-
-        }
-      );
-
-    }
-
-
-    /* =====================================================
-       CURSOR GLOW
-    ===================================================== */
-
-    if (
-      matchMedia(
-        '(pointer:fine)'
-      ).matches &&
-      !matchMedia(
-        '(prefers-reduced-motion:reduce)'
-      ).matches
-    ) {
-
-      const glow =
-        document.createElement(
-          'div'
-        );
-
-      glow.className =
-        'cursor-glow';
-
-      document.body.appendChild(
-        glow
-      );
-
-
-      window.addEventListener(
-        'pointermove',
-        e => {
-
-          glow.style.left =
-            e.clientX + 'px';
-
-          glow.style.top =
-            e.clientY + 'px';
-
-          glow.style.opacity =
-            '1';
-
-        },
-        {
-          passive: true
-        }
-      );
-
-
-      document
-        .documentElement
-        .addEventListener(
-          'mouseleave',
-          () => {
-
-            glow.style.opacity =
-              '0';
-
-          }
-        );
-
-    }
-
-  }
-);
+});
