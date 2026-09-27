@@ -1,65 +1,247 @@
-const C=window.HAOYANG_CONFIG||{};
-const common={
- zh:{brand:'皓洋包装厂',home:'首页',about:'关于我们',factory:'工厂实力',custom:'定制包装',cases:'案例',contact:'询价联系',cta:'获取包装方案',footer:'精品礼盒与定制包装',wa:'WhatsApp 咨询'},
- en:{brand:'Haoyang Packaging',home:'Home',about:'About Us',factory:'Factory',custom:'Custom Packaging',cases:'Portfolio',contact:'Contact',cta:'Get a Quote',footer:'Premium Gift Boxes & Custom Packaging',wa:'WhatsApp'}
-};
-const aboutTranslations = {
+const C = window.HAOYANG_CONFIG || {};
+
+/* =========================================================
+   COMMON TRANSLATIONS
+========================================================= */
+
+const common = {
   zh: {
-    <span
-  class="eyebrow"
-  data-i18n="heroEyebrow"
->
-  ABOUT HAOYANG
-</span>
-
-<h1 data-i18n="heroTitle">
-  从产品需求出发，<br>
-  打造真正适合市场的包装。
-</h1>
-
-<p data-i18n="heroText">
-  皓洋包装厂专注于精品礼盒与定制包装，
-  为香水、美妆、食品、礼赠、文创及企业定制等产品提供包装解决方案。
-  我们从产品特性与品牌需求出发，
-  综合考虑结构设计、视觉呈现、运输防护、装配效率与成本控制，
-  让包装不仅好看，更适合实际销售与长期使用。
-</p>
+    brand: '皓洋包装厂',
+    home: '首页',
+    about: '关于我们',
+    factory: '工厂实力',
+    custom: '定制包装',
+    cases: '案例展示',
+    contact: '询价联系',
+    cta: '获取定制报价',
+    footer: '精品礼盒与定制包装',
+    wa: 'WhatsApp 咨询'
+  },
 
   en: {
-    heroEyebrow: 'ABOUT HAOYANG',
-
-    heroTitle:
-      'Packaging designed around your product,<br>built for the market.',
-
-    heroText:
-      'Haoyang Packaging specializes in premium gift boxes and custom packaging for fragrance, beauty, food, gifting, creative products and corporate projects. We develop each packaging solution around the product and brand, balancing structural design, visual presentation, shipping protection, assembly efficiency and cost control.'
+    brand: 'Haoyang Packaging',
+    home: 'Home',
+    about: 'About Us',
+    factory: 'Factory',
+    custom: 'Custom Packaging',
+    cases: 'Portfolio',
+    contact: 'Contact',
+    cta: 'Request a Quote',
+    footer: 'Premium Gift Boxes & Custom Packaging',
+    wa: 'WhatsApp Inquiry'
   }
 };
-let lang=localStorage.getItem('haoyang-lang')||'zh';
-function applyCommon(){
- document.documentElement.lang=lang==='zh'?'zh-CN':'en';const t=common[lang];
- document.querySelectorAll('[data-common]').forEach(el=>{const k=el.dataset.common;if(t[k])el.innerHTML=t[k]});
- const b=document.getElementById('langToggle');if(b)b.textContent=lang==='zh'?'EN':'中文';
- document.querySelectorAll('[data-address]').forEach(el=>el.textContent=lang==='zh'?C.addressZh:C.addressEn);
- document.querySelectorAll('[data-email]').forEach(el=>{el.textContent=C.email;el.href='mailto:'+C.email});
- document.querySelectorAll('[data-phone]').forEach(el=>{el.textContent=C.phone;el.href='tel:'+C.phone});
- document.querySelectorAll('[data-wechat]').forEach(el=>el.textContent=C.wechat);
- document.querySelectorAll('[data-whatsapp]').forEach(el=>{el.href=C.whatsapp&&!C.whatsapp.startsWith('YOUR_')?'https://wa.me/'+C.whatsapp+'?text='+encodeURIComponent(lang==='zh'?'您好，我想咨询定制包装。':'Hello, I would like to inquire about custom packaging.'):'#contact';});
+
+
+/* =========================================================
+   LANGUAGE
+========================================================= */
+
+let lang = localStorage.getItem('haoyang-lang') || 'zh';
+
+if (!['zh', 'en'].includes(lang)) {
+  lang = 'zh';
 }
-/* About 页面翻译 */
-function applyAbout(){
-  const t = aboutTranslations[lang];
 
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.dataset.i18n;
 
-    if(t && t[key]){
-      el.innerHTML = t[key];
+/* =========================================================
+   COMMON CONTENT
+========================================================= */
+
+function applyCommon() {
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+
+  const t = common[lang];
+
+
+  /* Common navigation / buttons */
+
+  document.querySelectorAll('[data-common]').forEach(el => {
+    const key = el.dataset.common;
+
+    if (t[key]) {
+      el.textContent = t[key];
     }
   });
+
+
+  /* Language switch button */
+
+  const langButton = document.getElementById('langToggle');
+
+  if (langButton) {
+    langButton.textContent = lang === 'zh' ? 'EN' : '中文';
+
+    langButton.setAttribute(
+      'aria-label',
+      lang === 'zh'
+        ? 'Switch to English'
+        : '切换为中文'
+    );
+  }
+
+
+  /* Address */
+
+  document.querySelectorAll('[data-address]').forEach(el => {
+    const address = lang === 'zh'
+      ? C.addressZh
+      : C.addressEn;
+
+    if (address) {
+      el.textContent = address;
+    }
+  });
+
+
+  /* Email */
+
+  document.querySelectorAll('[data-email]').forEach(el => {
+    if (!C.email) return;
+
+    el.textContent = C.email;
+
+    if (el.tagName === 'A') {
+      el.href = 'mailto:' + C.email;
+    }
+  });
+
+
+  /* Phone */
+
+  document.querySelectorAll('[data-phone]').forEach(el => {
+    if (!C.phone) return;
+
+    el.textContent = C.phone;
+
+    if (el.tagName === 'A') {
+      el.href = 'tel:' + C.phone;
+    }
+  });
+
+
+  /* WeChat */
+
+  document.querySelectorAll('[data-wechat]').forEach(el => {
+    if (C.wechat) {
+      el.textContent = C.wechat;
+    }
+  });
+
+
+  /* WhatsApp */
+
+  document.querySelectorAll('[data-whatsapp]').forEach(el => {
+
+    const whatsappReady =
+      C.whatsapp &&
+      !C.whatsapp.startsWith('YOUR_');
+
+    if (whatsappReady) {
+
+      const message =
+        lang === 'zh'
+          ? '您好，我想咨询定制包装项目。'
+          : 'Hello, I would like to inquire about a custom packaging project.';
+
+      el.href =
+        'https://wa.me/' +
+        C.whatsapp +
+        '?text=' +
+        encodeURIComponent(message);
+
+    } else {
+
+      el.href = '#contact';
+
+    }
+
+    el.setAttribute(
+      'aria-label',
+      lang === 'zh'
+        ? '通过 WhatsApp 咨询'
+        : 'Contact us on WhatsApp'
+    );
+  });
 }
-function switchLang(){
-  lang=lang==='zh'?'en':'zh';
+
+
+/* =========================================================
+   PAGE TRANSLATIONS
+
+   使用方式：
+
+   data-zh="中文"
+   data-en="English"
+
+========================================================= */
+
+function applyPageTranslations() {
+
+  document
+    .querySelectorAll('[data-zh][data-en]')
+    .forEach(el => {
+
+      const value = el.getAttribute(
+        lang === 'zh'
+          ? 'data-zh'
+          : 'data-en'
+      );
+
+      if (value === null) return;
+
+
+      /*
+       * META 标签不能使用 innerHTML，
+       * 所以更新 content 属性
+       */
+
+      if (el.tagName === 'META') {
+
+        el.setAttribute('content', value);
+
+      } else {
+
+        /*
+         * 使用 innerHTML
+         * 是为了支持 <br> 换行
+         */
+
+        el.innerHTML = value;
+
+      }
+
+    });
+
+
+  /* Image ALT translations */
+
+  document
+    .querySelectorAll('[data-alt-zh][data-alt-en]')
+    .forEach(el => {
+
+      const alt =
+        lang === 'zh'
+          ? el.getAttribute('data-alt-zh')
+          : el.getAttribute('data-alt-en');
+
+      if (alt !== null) {
+        el.setAttribute('alt', alt);
+      }
+
+    });
+}
+
+
+/* =========================================================
+   LANGUAGE SWITCH
+========================================================= */
+
+function switchLang() {
+
+  lang = lang === 'zh'
+    ? 'en'
+    : 'zh';
 
   localStorage.setItem(
     'haoyang-lang',
@@ -68,29 +250,423 @@ function switchLang(){
 
   applyCommon();
 
-  applyAbout();
+  applyPageTranslations();
+
+
+  /*
+   * 给其他页面脚本使用
+   */
 
   document.dispatchEvent(
     new CustomEvent(
       'haoyang-language',
       {
-        detail:{lang}
+        detail: {
+          lang
+        }
       }
     )
   );
 }
 
-document.addEventListener('DOMContentLoaded',()=>{
- applyCommon();
- applyAbout();
- document.getElementById('langToggle')?.addEventListener('click',switchLang);
- const nav=document.querySelector('.nav');
- const onScroll=()=>nav?.classList.toggle('scrolled',window.scrollY>12);onScroll();window.addEventListener('scroll',onScroll,{passive:true});
- const page=(location.pathname.split('/').pop()||'index.html').toLowerCase();document.querySelectorAll('.nav-links a').forEach(a=>{const href=(a.getAttribute('href')||'').split('#')[0].toLowerCase();if((page==='index.html'&&href==='index.html')||href===page)a.classList.add('active')});
- const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12,rootMargin:'0px 0px -5%'});
- document.querySelectorAll('.reveal').forEach((e,i)=>{e.style.transitionDelay=(i%4)*70+'ms';io.observe(e)});
- document.querySelectorAll('.tilt').forEach(card=>{card.addEventListener('pointermove',e=>{const r=card.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;card.style.transform=`perspective(900px) rotateY(${x*5}deg) rotateX(${-y*5}deg) translateY(-5px)`});card.addEventListener('pointerleave',()=>card.style.transform='')});
- const modal=document.getElementById('modal'),mi=document.getElementById('modalImg');document.querySelectorAll('.shot img').forEach(img=>img.addEventListener('click',()=>{if(modal&&mi){mi.src=img.src;modal.classList.add('open')}}));document.querySelector('.close')?.addEventListener('click',()=>modal?.classList.remove('open'));modal?.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open')});
- const form=document.getElementById('quoteForm');if(form){if(C.email&&!C.email.startsWith('YOUR_'))form.action='https://formsubmit.co/'+C.email;form.addEventListener('submit',e=>{if(!C.email||C.email.startsWith('YOUR_')){e.preventDefault();alert(lang==='zh'?'请先在 site-config.js 中填写真实收件邮箱，再部署网站。':'Please add your real receiving email in site-config.js before deployment.')}})}
- if(matchMedia('(pointer:fine)').matches&&!matchMedia('(prefers-reduced-motion:reduce)').matches){const glow=document.createElement('div');glow.className='cursor-glow';document.body.appendChild(glow);window.addEventListener('pointermove',e=>{glow.style.left=e.clientX+'px';glow.style.top=e.clientY+'px';glow.style.opacity='1'},{passive:true});document.documentElement.addEventListener('mouseleave',()=>glow.style.opacity='0')}
-});
+
+/* =========================================================
+   PAGE INITIALIZATION
+========================================================= */
+
+document.addEventListener(
+  'DOMContentLoaded',
+  () => {
+
+    /* Apply language */
+
+    applyCommon();
+
+    applyPageTranslations();
+
+
+    /* Language toggle */
+
+    document
+      .getElementById('langToggle')
+      ?.addEventListener(
+        'click',
+        switchLang
+      );
+
+
+    /* =====================================================
+       NAV SCROLL EFFECT
+    ===================================================== */
+
+    const nav =
+      document.querySelector('.nav');
+
+    const onScroll = () => {
+
+      nav?.classList.toggle(
+        'scrolled',
+        window.scrollY > 12
+      );
+
+    };
+
+    onScroll();
+
+    window.addEventListener(
+      'scroll',
+      onScroll,
+      {
+        passive: true
+      }
+    );
+
+
+    /* =====================================================
+       ACTIVE NAVIGATION
+    ===================================================== */
+
+    const page =
+      (
+        location.pathname
+          .split('/')
+          .pop() ||
+        'index.html'
+      ).toLowerCase();
+
+    document
+      .querySelectorAll('.nav-links a')
+      .forEach(a => {
+
+        const href =
+          (
+            a.getAttribute('href') || ''
+          )
+            .split('#')[0]
+            .toLowerCase();
+
+        if (
+          (
+            page === 'index.html' &&
+            href === 'index.html'
+          ) ||
+          href === page
+        ) {
+
+          a.classList.add('active');
+
+        }
+
+      });
+
+
+    /* =====================================================
+       REVEAL ANIMATION
+    ===================================================== */
+
+    if ('IntersectionObserver' in window) {
+
+      const io =
+        new IntersectionObserver(
+          entries => {
+
+            entries.forEach(entry => {
+
+              if (
+                entry.isIntersecting
+              ) {
+
+                entry
+                  .target
+                  .classList
+                  .add('in');
+
+                io.unobserve(
+                  entry.target
+                );
+
+              }
+
+            });
+
+          },
+          {
+            threshold: 0.12,
+            rootMargin:
+              '0px 0px -5%'
+          }
+        );
+
+
+      document
+        .querySelectorAll('.reveal')
+        .forEach(
+          (el, index) => {
+
+            el.style.transitionDelay =
+              (index % 4) *
+                70 +
+              'ms';
+
+            io.observe(el);
+
+          }
+        );
+
+    } else {
+
+      document
+        .querySelectorAll('.reveal')
+        .forEach(el => {
+
+          el.classList.add('in');
+
+        });
+
+    }
+
+
+    /* =====================================================
+       CARD TILT
+    ===================================================== */
+
+    document
+      .querySelectorAll('.tilt')
+      .forEach(card => {
+
+        card.addEventListener(
+          'pointermove',
+          e => {
+
+            const rect =
+              card.getBoundingClientRect();
+
+            const x =
+              (
+                e.clientX -
+                rect.left
+              ) /
+                rect.width -
+              0.5;
+
+            const y =
+              (
+                e.clientY -
+                rect.top
+              ) /
+                rect.height -
+              0.5;
+
+            card.style.transform =
+              `perspective(900px)
+               rotateY(${x * 5}deg)
+               rotateX(${-y * 5}deg)
+               translateY(-5px)`;
+
+          }
+        );
+
+
+        card.addEventListener(
+          'pointerleave',
+          () => {
+
+            card.style.transform = '';
+
+          }
+        );
+
+      });
+
+
+    /* =====================================================
+       IMAGE MODAL
+    ===================================================== */
+
+    const modal =
+      document.getElementById(
+        'modal'
+      );
+
+    const modalImage =
+      document.getElementById(
+        'modalImg'
+      );
+
+
+    document
+      .querySelectorAll(
+        '.shot img'
+      )
+      .forEach(img => {
+
+        img.addEventListener(
+          'click',
+          () => {
+
+            if (
+              modal &&
+              modalImage
+            ) {
+
+              modalImage.src =
+                img.src;
+
+              modal.classList.add(
+                'open'
+              );
+
+            }
+
+          }
+        );
+
+      });
+
+
+    document
+      .querySelector('.close')
+      ?.addEventListener(
+        'click',
+        () => {
+
+          modal?.classList.remove(
+            'open'
+          );
+
+        }
+      );
+
+
+    modal?.addEventListener(
+      'click',
+      e => {
+
+        if (
+          e.target === modal
+        ) {
+
+          modal.classList.remove(
+            'open'
+          );
+
+        }
+
+      }
+    );
+
+
+    /* =====================================================
+       QUOTE FORM
+    ===================================================== */
+
+    const form =
+      document.getElementById(
+        'quoteForm'
+      );
+
+    if (form) {
+
+      if (
+        C.email &&
+        !C.email.startsWith(
+          'YOUR_'
+        )
+      ) {
+
+        form.action =
+          'https://formsubmit.co/' +
+          C.email;
+
+      }
+
+
+      form.addEventListener(
+        'submit',
+        e => {
+
+          if (
+            !C.email ||
+            C.email.startsWith(
+              'YOUR_'
+            )
+          ) {
+
+            e.preventDefault();
+
+            alert(
+              lang === 'zh'
+                ? '请先在 site-config.js 中填写真实收件邮箱，再部署网站。'
+                : 'Please add your receiving email in site-config.js before deploying the website.'
+            );
+
+          }
+
+        }
+      );
+
+    }
+
+
+    /* =====================================================
+       CURSOR GLOW
+    ===================================================== */
+
+    if (
+      matchMedia(
+        '(pointer:fine)'
+      ).matches &&
+      !matchMedia(
+        '(prefers-reduced-motion:reduce)'
+      ).matches
+    ) {
+
+      const glow =
+        document.createElement(
+          'div'
+        );
+
+      glow.className =
+        'cursor-glow';
+
+      document.body.appendChild(
+        glow
+      );
+
+
+      window.addEventListener(
+        'pointermove',
+        e => {
+
+          glow.style.left =
+            e.clientX + 'px';
+
+          glow.style.top =
+            e.clientY + 'px';
+
+          glow.style.opacity =
+            '1';
+
+        },
+        {
+          passive: true
+        }
+      );
+
+
+      document
+        .documentElement
+        .addEventListener(
+          'mouseleave',
+          () => {
+
+            glow.style.opacity =
+              '0';
+
+          }
+        );
+
+    }
+
+  }
+);
