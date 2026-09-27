@@ -33,3 +33,5 @@
 
 ## 部署
 这是纯静态网站，可直接部署到 Vercel、Netlify、GitHub Pages、Cloudflare Pages、宝塔或 cPanel。
+
+Website update 2026-09-27
