@@ -3,6 +3,38 @@ const common={
  zh:{brand:'皓洋包装厂',home:'首页',about:'关于我们',factory:'工厂实力',custom:'定制包装',cases:'案例',contact:'询价联系',cta:'获取包装方案',footer:'精品礼盒与定制包装',wa:'WhatsApp 咨询'},
  en:{brand:'Haoyang Packaging',home:'Home',about:'About Us',factory:'Factory',custom:'Custom Packaging',cases:'Portfolio',contact:'Contact',cta:'Get a Quote',footer:'Premium Gift Boxes & Custom Packaging',wa:'WhatsApp'}
 };
+const aboutTranslations = {
+  zh: {
+    <span
+  class="eyebrow"
+  data-i18n="heroEyebrow"
+>
+  ABOUT HAOYANG
+</span>
+
+<h1 data-i18n="heroTitle">
+  从产品需求出发，<br>
+  打造真正适合市场的包装。
+</h1>
+
+<p data-i18n="heroText">
+  皓洋包装厂专注于精品礼盒与定制包装，
+  为香水、美妆、食品、礼赠、文创及企业定制等产品提供包装解决方案。
+  我们从产品特性与品牌需求出发，
+  综合考虑结构设计、视觉呈现、运输防护、装配效率与成本控制，
+  让包装不仅好看，更适合实际销售与长期使用。
+</p>
+
+  en: {
+    heroEyebrow: 'ABOUT HAOYANG',
+
+    heroTitle:
+      'Packaging designed around your product,<br>built for the market.',
+
+    heroText:
+      'Haoyang Packaging specializes in premium gift boxes and custom packaging for fragrance, beauty, food, gifting, creative products and corporate projects. We develop each packaging solution around the product and brand, balancing structural design, visual presentation, shipping protection, assembly efficiency and cost control.'
+  }
+};
 let lang=localStorage.getItem('haoyang-lang')||'zh';
 function applyCommon(){
  document.documentElement.lang=lang==='zh'?'zh-CN':'en';const t=common[lang];
@@ -14,10 +46,43 @@ function applyCommon(){
  document.querySelectorAll('[data-wechat]').forEach(el=>el.textContent=C.wechat);
  document.querySelectorAll('[data-whatsapp]').forEach(el=>{el.href=C.whatsapp&&!C.whatsapp.startsWith('YOUR_')?'https://wa.me/'+C.whatsapp+'?text='+encodeURIComponent(lang==='zh'?'您好，我想咨询定制包装。':'Hello, I would like to inquire about custom packaging.'):'#contact';});
 }
-function switchLang(){lang=lang==='zh'?'en':'zh';localStorage.setItem('haoyang-lang',lang);applyCommon();document.dispatchEvent(new CustomEvent('haoyang-language',{detail:{lang}}));}
+/* About 页面翻译 */
+function applyAbout(){
+  const t = aboutTranslations[lang];
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+
+    if(t && t[key]){
+      el.innerHTML = t[key];
+    }
+  });
+}
+function switchLang(){
+  lang=lang==='zh'?'en':'zh';
+
+  localStorage.setItem(
+    'haoyang-lang',
+    lang
+  );
+
+  applyCommon();
+
+  applyAbout();
+
+  document.dispatchEvent(
+    new CustomEvent(
+      'haoyang-language',
+      {
+        detail:{lang}
+      }
+    )
+  );
+}
 
 document.addEventListener('DOMContentLoaded',()=>{
  applyCommon();
+ applyAbout();
  document.getElementById('langToggle')?.addEventListener('click',switchLang);
  const nav=document.querySelector('.nav');
  const onScroll=()=>nav?.classList.toggle('scrolled',window.scrollY>12);onScroll();window.addEventListener('scroll',onScroll,{passive:true});
